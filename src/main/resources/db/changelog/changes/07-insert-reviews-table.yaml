@@ -1,0 +1,38 @@
+databaseChangeLog:
+  - changeSet:
+      id: insert-reviews-table
+      author: john_smith
+      changes:
+        - createTable:
+            tableName: reviews
+            columns:
+              - column:
+                  name: id
+                  type: bigint
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: review_text
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: rating
+                  type: double
+                  constraints:
+                    nullable: false
+              - column:
+                  name: wine_id
+                  type: bigint
+                  constraints:
+                    references: wines(id)
+                    foreignKeyName: fk_reviews_wine
+                    nullable: false
+              - column:
+                  name: user_id
+                  type: bigint
+                  constraints:
+                    references: users(id)
+                    foreignKeyName: fk_reviews_user
+                    nullable: false
