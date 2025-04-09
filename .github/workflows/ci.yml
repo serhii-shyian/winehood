@@ -18,5 +18,6 @@ jobs:
         run: |
           echo "JWT_EXPIRATION=${{secrets.JWT_EXPIRATION}}" >> .env
           echo "JWT_SECRET=${{secrets.JWT_SECRET}}" >> .env
+          echo "FRONTEND_URL=${{secrets.FRONTEND_URL}}" >> .env
       - name: Build with Maven
         run: mvn --batch-mode --update-snapshots verify
