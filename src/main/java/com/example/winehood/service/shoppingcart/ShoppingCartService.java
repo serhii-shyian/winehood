@@ -10,20 +10,13 @@ import org.springframework.data.domain.Pageable;
 public interface ShoppingCartService {
     void createShoppingCart(User user);
 
-    ShoppingCartDto findShoppingCart(
-            User user,
-            Pageable pageable);
+    ShoppingCartDto findShoppingCart(User user, Pageable pageable);
 
     CartItemDto addWineToShoppingCart(
-            User user,
-            CreateCartItemRequestDto createCartDto);
+            User user, CreateCartItemRequestDto createCartDto);
 
     CartItemDto updateWineInShoppingCart(
-            User user,
-            Long cartItemId,
-            UpdateCartItemRequestDto updateCartDto);
+            User user, Long cartItemId, UpdateCartItemRequestDto updateCartDto);
 
-    void deleteWineFromShoppingCart(
-            User user,
-            Long cartItemId);
+    void deleteWineFromShoppingCart(User user, Long cartItemId);
 }
