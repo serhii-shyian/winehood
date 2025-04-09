@@ -4,10 +4,10 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class WinehoodApplication {
+public class WineHoodApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(WinehoodApplication.class, args);
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(WineHoodApplication.class, args);
+    }
 
 }
