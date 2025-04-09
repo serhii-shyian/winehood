@@ -1,0 +1,40 @@
+databaseChangeLog:
+  - changeSet:
+      id: create-order-items-table
+      author: john_smith
+      changes:
+        - createTable:
+            tableName: order_items
+            columns:
+              - column:
+                  name: id
+                  type: bigint
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: order_id
+                  type: bigint
+                  constraints:
+                    nullable: false
+              - column:
+                  name: wine_id
+                  type: bigint
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: quantity
+                  type: int
+                  constraints:
+                    nullable: false
+              - column:
+                  name: price
+                  type: decimal(10,2)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: is_deleted
+                  type: TINYINT(1)
+                  defaultValueBoolean: false
+                  constraints:
+                    nullable: false
