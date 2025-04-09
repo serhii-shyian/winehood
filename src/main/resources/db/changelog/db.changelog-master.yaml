@@ -7,3 +7,9 @@ databaseChangeLog:
       file: db/changelog/changes/03-create-users_roles-table.yaml
   - include:
       file: db/changelog/changes/04-insert-admin-role-user.yaml
+  - include:
+      file: db/changelog/changes/05-insert-regions-table.yaml
+  - include:
+      file: db/changelog/changes/06-insert-wines-table.yaml
+  - include:
+      file: db/changelog/changes/07-insert-reviews-table.yaml
