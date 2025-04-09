@@ -13,7 +13,7 @@ databaseChangeLog:
                   constraints:
                     primaryKey: true
               - column:
-                  name: review_text
+                  name: text
                   type: varchar(255)
                   constraints:
                     nullable: false
@@ -35,4 +35,9 @@ databaseChangeLog:
                   constraints:
                     references: users(id)
                     foreignKeyName: fk_reviews_user
+                    nullable: false
+              - column:
+                  name: timestamp
+                  type: timestamp
+                  constraints:
                     nullable: false

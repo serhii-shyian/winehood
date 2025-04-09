@@ -7,6 +7,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import java.time.LocalDateTime;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -20,10 +21,11 @@ public class Review {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String reviewText;
+    private String text;
     private Double rating;
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     private Wine wine;
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     private User user;
+    private LocalDateTime timestamp;
 }
