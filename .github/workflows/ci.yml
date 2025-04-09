@@ -14,5 +14,9 @@ jobs:
           java-version: '21'
           distribution: 'adopt'
           cache: maven
+      - name: Create .env file
+        run: |
+          echo "JWT_EXPIRATION=${{secrets.JWT_EXPIRATION}}" >> .env
+          echo "JWT_SECRET=${{secrets.JWT_SECRET}}" >> .env
       - name: Build with Maven
         run: mvn --batch-mode --update-snapshots verify
