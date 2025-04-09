@@ -13,3 +13,7 @@ databaseChangeLog:
       file: db/changelog/changes/06-insert-wines-table.yaml
   - include:
       file: db/changelog/changes/07-insert-reviews-table.yaml
+  - include:
+      file: db/changelog/changes/08-insert-shopping_carts-table.yaml
+  - include:
+      file: db/changelog/changes/09-insert-cart_items-table.yaml

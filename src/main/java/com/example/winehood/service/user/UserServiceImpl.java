@@ -9,6 +9,7 @@ import com.example.winehood.model.Role;
 import com.example.winehood.model.User;
 import com.example.winehood.repository.role.RoleRepository;
 import com.example.winehood.repository.user.UserRepository;
+import com.example.winehood.service.shoppingcart.ShoppingCartService;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -26,6 +27,7 @@ public class UserServiceImpl implements UserService {
     private final UserMapper userMapper;
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
+    private final ShoppingCartService shoppingCartService;
 
     @Override
     public UserResponseDto register(UserRegisterRequestDto registrationDto)
@@ -42,6 +44,7 @@ public class UserServiceImpl implements UserService {
                 Role.RoleName.USER)));
 
         User savedUser = userRepository.save(userFromDto);
+        shoppingCartService.createShoppingCart(userFromDto);
 
         return userMapper.toDto(savedUser);
     }

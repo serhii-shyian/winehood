@@ -1,0 +1,27 @@
+databaseChangeLog:
+    - changeSet:
+        id: create-cart_items-table
+        author: john_smith
+        changes:
+          - createTable:
+              tableName: cart_items
+              columns:
+                - column:
+                    name: shopping_cart_id
+                    type: bigint
+                    constraints:
+                      references: shopping_carts(user_id)
+                      foreignKeyName: fk_cart_items_shopping_cart_user_id
+                      nullable: false
+                - column:
+                    name: wine_id
+                    type: bigint
+                    constraints:
+                      primaryKey: true
+                      references: wines(id)
+                      foreignKeyName: fk_cart_items_wine_id
+                - column:
+                    name: quantity
+                    type: integer
+                    constraints:
+                      nullable: false
