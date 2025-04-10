@@ -17,7 +17,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -42,14 +42,13 @@ public class ShoppingCartController {
     @Operation(summary = "Get a user shopping cart",
             description = "Getting a user shopping cart if available")
     @PreAuthorize("hasRole('USER')")
-    public ShoppingCartDto getUserShoppingCart(Authentication authentication,
+    public ShoppingCartDto getUserShoppingCart(@AuthenticationPrincipal User user,
                                                @ParameterObject
                                                @PageableDefault(
                                                        size = 5,
                                                        sort = "wine",
                                                        direction = Sort.Direction.ASC)
                                                Pageable pageable) {
-        User user = (User) authentication.getPrincipal();
         return shoppingCartService.findShoppingCart(user, pageable);
     }
 
@@ -59,9 +58,8 @@ public class ShoppingCartController {
             description = "Adding a wine to shopping cart according to the parameters")
     @PreAuthorize("hasRole('USER')")
     public CartItemDto addWineToShoppingCart(
-            Authentication authentication,
+            @AuthenticationPrincipal User user,
             @RequestBody @Valid CreateCartItemRequestDto createCartDto) {
-        User user = (User) authentication.getPrincipal();
         return shoppingCartService.addWineToShoppingCart(user, createCartDto);
     }
 
@@ -71,10 +69,9 @@ public class ShoppingCartController {
             description = "Updating a wine in shopping cart according to the parameters")
     @PreAuthorize("hasRole('USER')")
     public CartItemDto updateWineInShoppingCart(
-            Authentication authentication,
+            @AuthenticationPrincipal User user,
             @PathVariable @Positive Long cartItemId,
             @RequestBody @Valid UpdateCartItemRequestDto requestDto) {
-        User user = (User) authentication.getPrincipal();
         return shoppingCartService.updateWineInShoppingCart(
                 user, cartItemId, requestDto);
     }
@@ -84,9 +81,8 @@ public class ShoppingCartController {
     @Operation(summary = "Delete a wine from shopping cart",
             description = "Delete a wine from shopping cart if available")
     @PreAuthorize("hasRole('USER')")
-    public void deleteWineFromShoppingCart(Authentication authentication,
+    public void deleteWineFromShoppingCart(@AuthenticationPrincipal User user,
                                            @PathVariable @Valid Long cartItemId) {
-        User user = (User) authentication.getPrincipal();
         shoppingCartService.deleteWineFromShoppingCart(user, cartItemId);
     }
 }

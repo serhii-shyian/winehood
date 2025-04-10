@@ -11,7 +11,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -42,8 +42,7 @@ public class UserController {
     @ResponseStatus(HttpStatus.OK)
     @Operation(summary = "Get users profile",
             description = "Getting users profile if available")
-    public UserResponseDto getProfile(Authentication authentication) {
-        User user = (User) authentication.getPrincipal();
+    public UserResponseDto getProfile(@AuthenticationPrincipal User user) {
         return userService.findProfile(user);
     }
 
@@ -52,9 +51,8 @@ public class UserController {
     @Operation(summary = "Update users profile",
             description = "Updating users profile if available")
     public UserResponseDto updateProfile(
-            Authentication authentication,
+            @AuthenticationPrincipal User user,
             @RequestBody @Valid UserRegisterRequestDto updateDto) {
-        User user = (User) authentication.getPrincipal();
         return userService.updateProfile(user, updateDto);
     }
 }

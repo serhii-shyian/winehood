@@ -4,7 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.example.winehood.repository.wine.WineRepository;
+import com.example.winehood.repository.review.ReviewRepository;
 import java.sql.Connection;
 import java.sql.SQLException;
 import javax.sql.DataSource;
@@ -21,10 +21,10 @@ import org.springframework.test.context.jdbc.Sql;
 
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-public class WineRepositoryTest {
+public class ReviewRepositoryTest {
 
     @Autowired
-    private WineRepository wineRepository;
+    private ReviewRepository reviewRepository;
 
     @BeforeAll
     static void beforeAll(@Autowired DataSource dataSource) throws SQLException {
@@ -37,7 +37,41 @@ public class WineRepositoryTest {
 
     @Test
     @DisplayName("""
-            Find wines by regionId when region exists
+            Find reviews by wineId when wine exists
+            """)
+    @Sql(scripts = {
+            "classpath:database/roles/insert-into-roles.sql",
+            "classpath:database/users/insert-into-users.sql",
+            "classpath:database/regions/insert-into-regions.sql",
+            "classpath:database/wines/insert-into-wines.sql",
+            "classpath:database/reviews/insert-into-reviews.sql" },
+            executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    @Sql(scripts = {
+            "classpath:database/reviews/delete-all-from-reviews.sql",
+            "classpath:database/wines/delete-all-from-wines.sql",
+            "classpath:database/regions/delete-all-from-regions.sql",
+            "classpath:database/users/delete-all-from-users.sql",
+            "classpath:database/roles/delete-all-from-roles.sql"},
+            executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
+    void findAllByWineId_ExistingWineId_ReturnsReviewPage() {
+        // Given
+        Long wineId = 1L;
+        int expectedTotalElements = 2;
+
+        // When
+        var reviewPage = reviewRepository.findAllByWineId(wineId, Pageable.ofSize(5));
+
+        // Then
+        assertNotNull(reviewPage);
+        assertEquals(expectedTotalElements, reviewPage.getTotalElements());
+        assertEquals(2, reviewPage.getContent().size());
+        assertTrue(reviewPage.getContent().stream()
+                .allMatch(review -> review.getWine().getId().equals(wineId)));
+    }
+
+    @Test
+    @DisplayName("""
+            Find reviews by wineId when no reviews exist
             """)
     @Sql(scripts = {
             "classpath:database/regions/insert-into-regions.sql",
@@ -47,40 +81,15 @@ public class WineRepositoryTest {
             "classpath:database/wines/delete-all-from-wines.sql",
             "classpath:database/regions/delete-all-from-regions.sql"},
             executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
-    void findAllByRegionId_ExistingRegionId_ReturnsWinePage() {
+    void findAllByWineId_NoReviewsForWine_ReturnsEmptyPage() {
         // Given
-        Long regionId = 1L;
-        int expectedTotalElements = 2;
+        Long wineId = 99L;
 
         // When
-        var winePage = wineRepository.findAllByRegionId(regionId, Pageable.ofSize(5));
+        var reviewPage = reviewRepository.findAllByWineId(wineId, Pageable.ofSize(5));
 
         // Then
-        assertNotNull(winePage);
-        assertEquals(expectedTotalElements, winePage.getTotalElements());
-        assertEquals(2, winePage.getContent().size());
-        assertTrue(winePage.getContent().stream()
-                .allMatch(wine -> wine.getRegion().getId().equals(regionId)));
-    }
-
-    @Test
-    @DisplayName("""
-            Find wines by regionId when no wines exist
-            """)
-    @Sql(scripts = {
-            "classpath:database/regions/insert-into-regions.sql"},
-            executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
-    @Sql(scripts = {"classpath:database/regions/delete-all-from-regions.sql"},
-            executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
-    void findAllByRegionId_NoWinesForRegion_ReturnsEmptyPage() {
-        // Given
-        Long regionId = 99L;
-
-        // When
-        var winePage = wineRepository.findAllByRegionId(regionId, Pageable.ofSize(5));
-
-        // Then
-        assertNotNull(winePage);
-        assertEquals(0, winePage.getTotalElements());
+        assertNotNull(reviewPage);
+        assertEquals(0, reviewPage.getTotalElements());
     }
 }
