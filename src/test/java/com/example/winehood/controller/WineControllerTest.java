@@ -11,12 +11,12 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.example.winehood.dto.region.CreateRegionRequestDto;
-import com.example.winehood.dto.region.RegionDto;
-import com.example.winehood.dto.wine.WineDtoWithoutRegion;
+import com.example.winehood.dto.wine.CreateWineRequestDto;
+import com.example.winehood.dto.wine.WineDto;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Arrays;
@@ -43,7 +43,7 @@ import org.springframework.web.context.WebApplicationContext;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-class RegionControllerTest {
+class WineControllerTest {
     private static MockMvc mockMvc;
     @Autowired
     private ObjectMapper objectMapper;
@@ -85,20 +85,20 @@ class RegionControllerTest {
     @Test
     @Order(1)
     @DisplayName("""
-            Get list of all regions when they exist
-            """)
+                Get list of all wines when they exist
+                """)
     @WithMockUser(username = "user")
-    void getAllRegions_RegionsExist_ReturnsRegionDtoPage() throws Exception {
+    void getAllWines_WinesExist_ReturnsWineDtoPage()
+            throws Exception {
         // Given
-        List<RegionDto> regionDtoList = getRegionDtoList();
-        int expectedTotalElements = regionDtoList.size();
+        List<WineDto> wineDtoList = getWineDtoList();
+        int expectedTotalElements = wineDtoList.size();
 
         // When
         MvcResult result = mockMvc.perform(
-                        get("/regions")
+                        get("/wines")
                                 .param("page", "0")
-                                .param("size", "5")
-                                .param("sort", "id")
+                                .param("size", "10")
                                 .contentType(MediaType.APPLICATION_JSON)
                 )
                 .andExpect(status().isOk())
@@ -108,35 +108,38 @@ class RegionControllerTest {
         String jsonResponse = result.getResponse().getContentAsString();
         JsonNode root = objectMapper.readTree(jsonResponse);
         JsonNode contentNode = root.path("content");
-        List<RegionDto> actualList = Arrays.asList(
-                objectMapper.treeToValue(contentNode, RegionDto[].class));
+        List<WineDto> actualList = Arrays.asList(
+                objectMapper.treeToValue(contentNode, WineDto[].class));
 
         int actualTotalElements = root.path("totalElements").asInt();
         assertEquals(expectedTotalElements, actualTotalElements);
-        assertEquals(regionDtoList, actualList);
+        assertEquals(wineDtoList, actualList);
     }
 
     @Test
     @Order(2)
     @DisplayName("""
-            Get region by id when it exists
-            """)
+                Get wine by id when it exists
+                """)
     @WithMockUser(username = "user")
-    void getRegionById_ExistingId_ReturnsRegionDto() throws Exception {
+    void getById_ExistingWineId_ReturnsWineDto()
+            throws Exception {
         // Given
-        RegionDto expected = getRegionDtoList().getFirst();
+        WineDto expected = getWineDtoList().getFirst();
+        expected.setPrice(expected.getPrice()
+                .setScale(2, RoundingMode.HALF_UP));
 
         // When
         MvcResult result = mockMvc.perform(
-                        get("/regions/1")
+                        get("/wines/1")
                                 .contentType(MediaType.APPLICATION_JSON)
                 )
                 .andExpect(status().isOk())
                 .andReturn();
 
         // Then
-        RegionDto actual = objectMapper.readValue(
-                result.getResponse().getContentAsByteArray(), RegionDto.class);
+        WineDto actual = objectMapper.readValue(
+                result.getResponse().getContentAsByteArray(), WineDto.class);
         assertNotNull(actual);
         assertEquals(expected, actual);
     }
@@ -144,59 +147,20 @@ class RegionControllerTest {
     @Test
     @Order(3)
     @DisplayName("""
-            Get wines by region id when region exists
-            """)
-    @WithMockUser(username = "user")
-    void getWinesByRegionId_ExistingRegion_ReturnsWineDtoPage() throws Exception {
-        // Given
-        int regionId = 1;
-        List<WineDtoWithoutRegion> expectedWines = getExpectedWinesForRegion(regionId);
-        int expectedTotalElements = expectedWines.size();
-
-        // When
-        MvcResult result = mockMvc.perform(
-                        get("/regions/" + regionId + "/wines")
-                                .param("page", "0")
-                                .param("size", "5")
-                                .contentType(MediaType.APPLICATION_JSON)
-                )
-                .andExpect(status().isOk())
-                .andReturn();
-
-        // Then
-        String jsonResponse = result.getResponse().getContentAsString();
-        JsonNode root = objectMapper.readTree(jsonResponse);
-        JsonNode contentNode = root.path("content");
-        List<WineDtoWithoutRegion> actualWines = Arrays.asList(
-                objectMapper.treeToValue(contentNode, WineDtoWithoutRegion[].class));
-
-        int actualTotalElements = root.path("totalElements").asInt();
-        assertEquals(expectedTotalElements, actualTotalElements);
-        assertEquals(expectedWines, actualWines);
-    }
-
-    private List<WineDtoWithoutRegion> getExpectedWinesForRegion(int regionId) {
-        return List.of(
-                new WineDtoWithoutRegion("Wine A", BigDecimal.valueOf(20.0), "Merlot"),
-                new WineDtoWithoutRegion("Wine B", BigDecimal.valueOf(30.0), "Cabernet Sauvignon")
-        );
-    }
-
-    @Test
-    @Order(4)
-    @DisplayName("""
-            Create a new region from valid DTO
-            """)
+                Create a new wine from valid DTO
+                """)
     @WithMockUser(username = "admin", roles = {"ADMIN"})
-    void createRegion_ValidRequest_ReturnsRegionDto() throws Exception {
+    void createWine_ValidRequestDto_ReturnsWineDto()
+            throws Exception {
         // Given
-        CreateRegionRequestDto requestDto = getCreateRegionRequestDtoList().getFirst();
+        CreateWineRequestDto requestDto
+                = getCreateWineRequestDtoList().get(0);
         String jsonRequest = objectMapper.writeValueAsString(requestDto);
-        RegionDto expected = getRegionDtoFromRequestDto(requestDto);
+        WineDto expected = getWineDtoFromRequestDto(requestDto);
 
         // When
         MvcResult result = mockMvc.perform(
-                        post("/regions")
+                        post("/wines")
                                 .content(jsonRequest)
                                 .contentType(MediaType.APPLICATION_JSON)
                 )
@@ -204,28 +168,30 @@ class RegionControllerTest {
                 .andReturn();
 
         // Then
-        RegionDto actual = objectMapper.readValue(
-                result.getResponse().getContentAsByteArray(), RegionDto.class);
+        WineDto actual = objectMapper.readValue(
+                result.getResponse().getContentAsByteArray(), WineDto.class);
         assertNotNull(actual);
-        assertNotNull(actual.id());
+        assertNotNull(actual.getId());
         assertTrue(reflectionEquals(expected, actual, "id"));
     }
 
     @Test
-    @Order(5)
+    @Order(4)
     @DisplayName("""
-            Update region by id when it exists
-            """)
+                Update wine by id when it exists
+                """)
     @WithMockUser(username = "admin", roles = {"ADMIN"})
-    void updateRegion_ExistingId_ReturnsRegionDto() throws Exception {
+    void updateWine_ExistingWineId_ReturnsWineDto()
+            throws Exception {
         // Given
-        CreateRegionRequestDto requestDto = getCreateRegionRequestDtoList().get(1);
+        CreateWineRequestDto requestDto
+                = getCreateWineRequestDtoList().get(1);
         String jsonRequest = objectMapper.writeValueAsString(requestDto);
-        RegionDto expected = getRegionDtoFromRequestDto(requestDto);
+        WineDto expected = getWineDtoFromRequestDto(requestDto);
 
         // When
         MvcResult result = mockMvc.perform(
-                        put("/regions/1")
+                        put("/wines/1")
                                 .content(jsonRequest)
                                 .contentType(MediaType.APPLICATION_JSON)
                 )
@@ -233,22 +199,23 @@ class RegionControllerTest {
                 .andReturn();
 
         // Then
-        RegionDto actual = objectMapper.readValue(
-                result.getResponse().getContentAsByteArray(), RegionDto.class);
+        WineDto actual = objectMapper.readValue(
+                result.getResponse().getContentAsByteArray(), WineDto.class);
         assertNotNull(actual);
         assertEquals(expected, actual);
     }
 
     @Test
-    @Order(6)
+    @Order(5)
     @DisplayName("""
-            Delete region by id when it exists
-            """)
+                Delete wine by id when it exists
+                """)
     @WithMockUser(username = "admin", roles = {"ADMIN"})
-    void deleteRegionById_ExistingId_DeletesSuccessfully() throws Exception {
+    void deleteWine_ExistingWineId_ReturnsNothing()
+            throws Exception {
         // When
         MvcResult result = mockMvc.perform(
-                        delete("/regions/1")
+                        delete("/wines/1")
                                 .contentType(MediaType.APPLICATION_JSON)
                 )
                 .andExpect(status().isNoContent())
@@ -259,22 +226,50 @@ class RegionControllerTest {
         assertTrue(actual.isEmpty());
     }
 
-    private List<RegionDto> getRegionDtoList() {
+    private List<WineDto> getWineDtoList() {
         return List.of(
-                new RegionDto(1L, "Napa Valley", "USA"),
-                new RegionDto(2L, "Tuscany", "Italy"),
-                new RegionDto(3L, "Bordeaux", "France")
+                new WineDto()
+                        .setId(1L)
+                        .setName("Wine A")
+                        .setPrice(BigDecimal.valueOf(20.00))
+                        .setGrapeVariety("Merlot")
+                        .setRegionId(1L),
+                new WineDto()
+                        .setId(2L)
+                        .setName("Wine B")
+                        .setPrice(BigDecimal.valueOf(30.00))
+                        .setGrapeVariety("Cabernet Sauvignon")
+                        .setRegionId(1L),
+                new WineDto()
+                        .setId(3L)
+                        .setName("Wine C")
+                        .setPrice(BigDecimal.valueOf(25.00))
+                        .setGrapeVariety("Pinot Noir")
+                        .setRegionId(2L)
         );
     }
 
-    private List<CreateRegionRequestDto> getCreateRegionRequestDtoList() {
+    private List<CreateWineRequestDto> getCreateWineRequestDtoList() {
         return List.of(
-                new CreateRegionRequestDto("Napa Valley", "USA"),
-                new CreateRegionRequestDto("Tuscany", "Italy")
+                new CreateWineRequestDto(
+                        "Sauvignon Blanc",
+                        BigDecimal.valueOf(22.00),
+                        "Sauvignon Blanc",
+                        3L),
+                new CreateWineRequestDto(
+                        "Cabernet Sauvignon",
+                        BigDecimal.valueOf(30.00),
+                        "Cabernet Sauvignon",
+                        1L)
         );
     }
 
-    private RegionDto getRegionDtoFromRequestDto(CreateRegionRequestDto requestDto) {
-        return new RegionDto(1L, requestDto.name(), requestDto.country());
+    private WineDto getWineDtoFromRequestDto(CreateWineRequestDto requestDto) {
+        return new WineDto()
+                .setId(1L)
+                .setName(requestDto.name())
+                .setPrice(requestDto.price())
+                .setGrapeVariety(requestDto.grapeVariety())
+                .setRegionId(requestDto.regionId());
     }
 }
