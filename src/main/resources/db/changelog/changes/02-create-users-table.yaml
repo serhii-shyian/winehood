@@ -40,6 +40,9 @@ databaseChangeLog:
                     constraints:
                       nullable: false
                 - column:
+                    name: shipping_address
+                    type: varchar(255)
+                - column:
                     name: is_deleted
                     type: TINYINT(1)
                     defaultValueBoolean: false
