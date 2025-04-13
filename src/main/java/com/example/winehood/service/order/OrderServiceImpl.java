@@ -16,7 +16,6 @@ import com.example.winehood.repository.order.OrderRepository;
 import com.example.winehood.repository.orderitem.OrderItemRepository;
 import com.example.winehood.repository.shoppingcart.ShoppingCartRepository;
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -36,14 +35,15 @@ public class OrderServiceImpl implements OrderService {
     private final OrderMapper orderMapper;
 
     @Override
-    public OrderDto createOrder(
-            Long userId, Pageable pageable, CreateOrderRequestDto createOrderDto) {
+    public OrderDto createOrder(Long userId, CreateOrderRequestDto createOrderDto) {
         ShoppingCart shoppingCart = findShoppingCartByUserId(userId);
 
         validateCartItems(shoppingCart.getCartItems());
 
-        Order order = createAndSaveOrder(shoppingCart, createOrderDto.shippingAddress());
-        order.setOrderItems(createAndSaveOrderItems(order, shoppingCart.getCartItems()));
+        Order order = createAndSaveOrder(shoppingCart, createOrderDto);
+        Set<OrderItem> orderItemSet = createAndSaveOrderItems(
+                order, shoppingCart.getCartItems());
+        order.setOrderItems(orderItemSet);
 
         clearShoppingCart(shoppingCart);
 
@@ -105,12 +105,12 @@ public class OrderServiceImpl implements OrderService {
         }
     }
 
-    private Order createAndSaveOrder(ShoppingCart shoppingCart, String shippingAddress) {
+    private Order createAndSaveOrder(ShoppingCart shoppingCart, CreateOrderRequestDto requestDto) {
         Order order = new Order();
         order.setUser(shoppingCart.getUser());
         order.setStatus(Order.Status.PENDING);
-        order.setOrderDate(LocalDateTime.now());
-        order.setShippingAddress(shippingAddress);
+        order.setOrderDate(requestDto.orderDate());
+        order.setShippingAddress(requestDto.shippingAddress());
         order.setTotal(calculateTotalOrderPrice(shoppingCart.getCartItems()));
         return orderRepository.save(order);
     }

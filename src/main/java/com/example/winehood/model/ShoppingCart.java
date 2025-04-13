@@ -12,7 +12,6 @@ import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.util.HashSet;
 import java.util.Set;
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -31,12 +30,10 @@ public class ShoppingCart {
     @OneToOne(fetch = FetchType.LAZY)
     @MapsId
     @ToString.Exclude
-    @EqualsAndHashCode.Exclude
     private User user;
     @OneToMany(mappedBy = "shoppingCart",
             fetch = FetchType.LAZY,
             cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @ToString.Exclude
-    @EqualsAndHashCode.Exclude
     private Set<CartItem> cartItems = new HashSet<>();
 }
