@@ -11,10 +11,10 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.math.BigDecimal;
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import lombok.experimental.Accessors;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 
@@ -25,14 +25,14 @@ import org.hibernate.annotations.SQLRestriction;
 @Getter
 @Setter
 @ToString
+@Accessors(chain = true)
 public class OrderItem {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "order_id", nullable = false)
+    @JoinColumn(nullable = false)
     @ToString.Exclude
-    @EqualsAndHashCode.Exclude
     private Order order;
     @OneToOne(fetch = FetchType.LAZY)
     private Wine wine;

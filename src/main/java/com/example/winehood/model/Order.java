@@ -16,10 +16,10 @@ import jakarta.persistence.Table;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Set;
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import lombok.experimental.Accessors;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 
@@ -30,14 +30,14 @@ import org.hibernate.annotations.SQLRestriction;
 @Getter
 @Setter
 @ToString
+@Accessors(chain = true)
 public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(nullable = false)
     @ToString.Exclude
-    @EqualsAndHashCode.Exclude
     private User user;
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -52,7 +52,6 @@ public class Order {
             fetch = FetchType.LAZY,
             cascade = {CascadeType.REMOVE, CascadeType.MERGE, CascadeType.PERSIST})
     @ToString.Exclude
-    @EqualsAndHashCode.Exclude
     private Set<OrderItem> orderItems;
     @Column(nullable = false)
     private boolean isDeleted;

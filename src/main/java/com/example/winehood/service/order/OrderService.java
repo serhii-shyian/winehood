@@ -8,8 +8,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 public interface OrderService {
-    OrderDto createOrder(
-            Long userId, Pageable pageable, CreateOrderRequestDto createOrderDto);
+    OrderDto createOrder(Long userId, CreateOrderRequestDto createOrderDto);
 
     Page<OrderDto> getOrders(Long userId, Pageable pageable);
 

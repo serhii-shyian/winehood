@@ -12,5 +12,6 @@ public record OrderDto(
         LocalDateTime orderDate,
         Set<OrderItemDto> orderItems,
         Order.Status status,
-        BigDecimal total) {
+        BigDecimal total,
+        String shippingAddress) {
 }

@@ -43,14 +43,8 @@ public class OrderController {
             description = "Submitting current creating order")
     @PreAuthorize("hasRole('USER')")
     public OrderDto submitOrder(@AuthenticationPrincipal User user,
-                                @RequestBody @Valid CreateOrderRequestDto requestDto,
-                                @ParameterObject
-                                @PageableDefault(
-                                        size = 5,
-                                        sort = "userId",
-                                        direction = Sort.Direction.ASC)
-                                Pageable pageable) {
-        return orderService.createOrder(user.getId(), pageable, requestDto);
+                                @RequestBody @Valid CreateOrderRequestDto requestDto) {
+        return orderService.createOrder(user.getId(), requestDto);
     }
 
     @GetMapping
